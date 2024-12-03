@@ -19,15 +19,18 @@ export class ExpressAdapter implements HttpServer {
   }
 
   register(method: string, url: string, callback: Function): void {
-    this.app[method](url, async function (req: Request, res: Response) {
-      try {
-        const output = await callback(req.params, req.body);
+    this.app[method](
+      url,
+      async function (request: Request, response: Response) {
+        try {
+          const output = await callback(request.params, request.body);
 
-        return res.json(output);
-      } catch (error: any) {
-        res.status(422).json({ message: error.message });
-      }
-    });
+          return response.json(output);
+        } catch (error: any) {
+          response.status(422).json({ message: error.message });
+        }
+      },
+    );
   }
 }
 
@@ -50,6 +53,7 @@ export class HapiAdapter implements HttpServer {
       handler: async function (request: any, reply: any) {
         try {
           const output = await callback(request.params, request.payload);
+
           return output;
         } catch (error: any) {
           return reply.response({ message: error.message }).code(422);

@@ -1,4 +1,4 @@
-import Account from '../../domain/Account';
+import Account from '../../domain/entity/Account';
 import DatabaseConnection from '../database/DatabaseConnection';
 
 export interface AccountRepository {
@@ -15,6 +15,7 @@ export class AccountRepositoryDatabase implements AccountRepository {
       'select * from cccat16.account where email = $1',
       [email],
     );
+
     if (!account) return;
 
     return Account.restore(
@@ -33,6 +34,7 @@ export class AccountRepositoryDatabase implements AccountRepository {
       'select * from cccat16.account where account_id = $1',
       [accountId],
     );
+
     return Account.restore(
       account.account_id,
       account.name,
@@ -49,10 +51,10 @@ export class AccountRepositoryDatabase implements AccountRepository {
       'insert into cccat16.account (account_id, name, email, cpf, car_plate, is_passenger, is_driver) values ($1, $2, $3, $4, $5, $6, $7)',
       [
         account.accountId,
-        account.name,
-        account.email,
-        account.cpf,
-        account.carPlate,
+        account.getName(),
+        account.getEmail(),
+        account.getCpf(),
+        account.getCarPlate(),
         !!account.isPassenger,
         !!account.isDriver,
       ],
@@ -61,27 +63,29 @@ export class AccountRepositoryDatabase implements AccountRepository {
 }
 
 export class AccountRepositoryMemory implements AccountRepository {
-  accounts: any[];
+  accounts: Account[];
 
   constructor() {
     this.accounts = [];
   }
 
-  async getAccountByEmail(email: string): Promise<any> {
+  async getAccountByEmail(email: string): Promise<Account | undefined> {
     const account = this.accounts.find(
-      (account: any) => account.email === email,
+      (ac: Account) => ac.getEmail() === email,
     );
+
     return account;
   }
 
-  async getAccountById(accountId: string): Promise<any> {
+  async getAccountById(accountId: string): Promise<Account | undefined> {
     const account = this.accounts.find(
-      (account: any) => account.accountId === accountId,
+      (ac: Account) => ac.accountId === accountId,
     );
+
     return account;
   }
 
-  async saveAccount(account: any): Promise<void> {
+  async saveAccount(account: Account): Promise<void> {
     this.accounts.push(account);
   }
 }

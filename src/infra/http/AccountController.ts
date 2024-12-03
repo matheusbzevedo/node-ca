@@ -1,5 +1,5 @@
 import { GetAccount } from '../../application/usecase/GetAccount';
-import { Signup } from '../../application/usecase/Signup';
+import Signup from '../../application/usecase/Signup';
 import HttpServer from './HttpServer';
 
 export default class AccountController {
@@ -11,8 +11,9 @@ export default class AccountController {
     httpServer.register(
       'post',
       '/signup',
-      async function (_params: any, body: any) {
+      async function (_parameters: any, body: any) {
         const output = await signup.execute(body);
+
         return output;
       },
     );
@@ -20,8 +21,9 @@ export default class AccountController {
     httpServer.register(
       'get',
       '/accounts/{accountId}',
-      async function (params: any, _body: any) {
-        const output = await getAccount.execute(params.accountId);
+      async function (parameters: any, _body: any) {
+        const output = await getAccount.execute(parameters.accountId);
+
         return output;
       },
     );

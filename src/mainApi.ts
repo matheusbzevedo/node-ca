@@ -1,5 +1,5 @@
 import { GetAccount } from './application/usecase/GetAccount';
-import { Signup } from './application/usecase/Signup';
+import Signup from './application/usecase/Signup';
 import { PgPromiseAdapter } from './infra/database/DatabaseConnection';
 import { MailerGatewayMemory } from './infra/gateway/MailerGateway';
 import AccountController from './infra/http/AccountController';

@@ -1,84 +1,167 @@
-import { FlatCompat } from "@eslint/eslintrc";
-import js from "@eslint/js";
-import typescriptEslint from "@typescript-eslint/eslint-plugin";
-import tsParser from "@typescript-eslint/parser";
-import globals from "globals";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fixupConfigRules, fixupPluginRules } from '@eslint/compat';
+import { FlatCompat } from '@eslint/eslintrc';
+import js from '@eslint/js';
+import typescriptEslint from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
+import _import from 'eslint-plugin-import';
+import prettier from 'eslint-plugin-prettier';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
+import sonarjs from 'eslint-plugin-sonarjs';
+import unicornPlugin from 'eslint-plugin-unicorn';
+import vitestPlugin from 'eslint-plugin-vitest';
+import globals from 'globals';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const compat = new FlatCompat({
-    baseDirectory: __dirname,
-    recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all
+  baseDirectory: __dirname,
+  recommendedConfig: js.configs.recommended,
+  allConfig: js.configs.all,
 });
 
-export default [{
-    languageOptions: {
-        globals: {
-            ...globals.node,
-        },
-    },
-}, ...compat.extends("eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier").map(config => ({
+function cleanGlobals(obj) {
+  return Object.fromEntries(
+    Object.entries(obj).map(([key, value]) => [key.trim(), value]),
+  );
+}
+
+export default [
+  ...fixupConfigRules(
+    compat.extends(
+      'eslint:recommended',
+      'plugin:import/recommended',
+      'plugin:import/typescript',
+      'plugin:prettier/recommended',
+      'plugin:unicorn/recommended',
+      'prettier',
+      'prettier/prettier',
+    ),
+  ).map((config) => ({
     ...config,
-    files: ["**/*.ts"],
-})), {
-    files: ["**/*.ts"],
-
-    plugins: {
-        "@typescript-eslint": typescriptEslint,
-    },
-
+    files: ['**/*.ts'],
     languageOptions: {
-        parser: tsParser,
-        ecmaVersion: "latest",
-        sourceType: "script",
+      globals: {
+        ...cleanGlobals(globals.browser),
+        ...cleanGlobals(globals.node),
+        ...cleanGlobals(globals.mocha),
+        'vitest/globals': true,
+      },
     },
-
+  })),
+  {
+    files: ['**/*.ts', '**/*.test.ts'],
+    plugins: {
+      '@typescript-eslint': typescriptEslint,
+      'simple-import-sort': simpleImportSort,
+      import: fixupPluginRules(_import),
+      prettier: fixupPluginRules(prettier),
+      sonarjs,
+      unicorn: fixupPluginRules(unicornPlugin),
+      vitest: fixupConfigRules(vitestPlugin),
+    },
+    languageOptions: {
+      parser: tsParser,
+      ecmaVersion: 2020,
+      sourceType: 'module',
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+    },
     rules: {
-        "no-constant-condition": ["error", {
-            checkLoops: false,
-        }],
-				"no-console": "error",
+      'unicorn/import-style': [
+        'error',
+        {
+          styles: {
+            util: false,
+            path: {
+              named: true,
+            },
+          },
+        },
+      ],
+      'unicorn/filename-case': [
+        'error',
+        {
+          cases: {
+            camelCase: true,
+            pascalCase: true,
+            kebabCase: true,
+          },
+        },
+      ],
+      'no-constant-condition': [
+        'error',
+        {
+          checkLoops: false,
+        },
+      ],
+      'no-empty-function': [
+        'error',
+        {
+          allow: ['constructors'],
+        },
+      ],
+      'no-multiple-empty-lines': [
+        'error',
+        {
+          max: 1,
+        },
+      ],
+      'no-param-reassign': ['error'],
+      'no-shadow': 'error',
+      'no-unused-vars': 'off',
+      'no-unsafe-optional-chaining': 'off',
+      'no-console': 'warn',
+      'padding-line-between-statements': [
+        'error',
+        {
+          blankLine: 'always',
+          prev: '*',
+          next: ['return', 'throw'],
+        },
+        {
+          blankLine: 'always',
+          prev: ['const', 'let', 'var'],
+          next: '*',
+        },
+        {
+          blankLine: 'any',
+          prev: ['const', 'let', 'var'],
+          next: ['const', 'let', 'var'],
+        },
+      ],
+      camelcase: 'warn',
+      'simple-import-sort/exports': 'error',
+      'simple-import-sort/imports': 'error',
+      'sonarjs/no-duplicate-string': 'off',
+      'import/no-duplicates': 'error',
 
-        "no-empty-function": "off",
+      'import/no-unresolved': [
+        'error',
+        {
+          ignore: ['^@/*'],
+        },
+      ],
+      indent: [
+        'error',
+        2,
+        {
+          MemberExpression: 1,
 
-        "no-multiple-empty-lines": ["error", {
-            max: 1,
-        }],
-				"@typescript-eslint/triple-slash-reference": "off",
-        "no-param-reassign": ["error"],
-        "no-shadow": "off",
-        "no-unused-vars": "off",
-        "no-unsafe-optional-chaining": "off",
-
-        "padding-line-between-statements": ["error", {
-            blankLine: "always",
-            prev: "*",
-            next: ["return", "throw"],
-        }, {
-            blankLine: "always",
-            prev: ["const", "let", "var"],
-            next: "*",
-        }, {
-            blankLine: "any",
-            prev: ["const", "let", "var"],
-            next: ["const", "let", "var"],
-        }],
-
-        "@typescript-eslint/no-empty-function": ["error", {
-            allow: ["constructors"],
-        }],
-
-        "@typescript-eslint/no-explicit-any": "off",
-        "@typescript-eslint/no-shadow": "error",
-
-        "@typescript-eslint/no-unused-vars": ["warn", {
-            vars: "all",
-            varsIgnorePattern: "^_",
-            args: "after-used",
-            argsIgnorePattern: "^_",
-        }],
+          ignoredNodes: [
+            'FunctionExpression > .params[decorators.length > 0]',
+            'FunctionExpression > .params > :matches(Decorator, :not(:first-child))',
+            'ClassBody.body > PropertyDefinition[decorators.length > 0] > .key',
+          ],
+        },
+      ],
+      'linebreak-style': ['error', 'unix'],
+      quotes: ['error', 'single', { allowTemplateLiterals: true }],
+      'prettier/prettier': ['error'],
     },
-}];
+  },
+];

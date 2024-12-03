@@ -1,7 +1,9 @@
 import { mock, spy, stub } from 'sinon';
+import { expect, test } from 'vitest';
+
 import { GetAccount } from '../../../src/application/usecase/GetAccount';
-import { Signup } from '../../../src/application/usecase/Signup';
-import Account from '../../../src/domain/Account';
+import Signup from '../../../src/application/usecase/Signup';
+import Account from '../../../src/domain/entity/Account';
 import { PgPromiseAdapter } from '../../../src/infra/database/DatabaseConnection';
 import { MailerGatewayMemory } from '../../../src/infra/gateway/MailerGateway';
 import {
@@ -15,6 +17,7 @@ let getAccount: GetAccount;
 beforeEach(() => {
   const accountRepository = new AccountRepositoryMemory();
   const mailerGateway = new MailerGatewayMemory();
+
   signup = new Signup(accountRepository, mailerGateway);
   getAccount = new GetAccount(accountRepository);
 });
@@ -27,8 +30,10 @@ test('Should be able to create a passenger account', async function () {
     isPassenger: true,
   };
   const outputSignup = await signup.execute(input);
+
   expect(outputSignup.accountId).toBeDefined();
   const outputGetAccount = await getAccount.execute(outputSignup.accountId);
+
   expect(outputGetAccount.name).toEqual(input.name);
   expect(outputGetAccount.email).toEqual(input.email);
   expect(outputGetAccount.cpf).toEqual(input.cpf);
@@ -44,8 +49,10 @@ test('Should be able to create a rider account', async function () {
     isDriver: true,
   };
   const outputSignup = await signup.execute(input);
+
   expect(outputSignup.accountId).toBeDefined();
   const outputGetAccount = await getAccount.execute(outputSignup.accountId);
+
   expect(outputGetAccount.name).toEqual(input.name);
   expect(outputGetAccount.email).toEqual(input.email);
   expect(outputGetAccount.cpf).toEqual(input.cpf);
@@ -60,6 +67,7 @@ test('Should not be able to create a rider account if car plate is invalid', asy
     isPassenger: false,
     isDriver: true,
   };
+
   await expect(() => signup.execute(input)).rejects.toThrow(
     new Error('Invalid car plate'),
   );
@@ -72,6 +80,7 @@ test('Should not be able to create passenger account if name is invalid', async 
     cpf: '87748248800',
     isPassenger: true,
   };
+
   await expect(() => signup.execute(input)).rejects.toThrow(
     new Error('Invalid name'),
   );
@@ -84,6 +93,7 @@ test('Should not be able to create passenger account if account already exists',
     cpf: '87748248800',
     isPassenger: true,
   };
+
   await signup.execute(input);
   await expect(() => signup.execute(input)).rejects.toThrow(
     new Error('Account already exists'),
@@ -97,6 +107,7 @@ test('Should not be able to create passenger account if email is invalid', async
     cpf: '87748248800',
     isPassenger: true,
   };
+
   await expect(() => signup.execute(input)).rejects.toThrow(
     new Error('Invalid email'),
   );
@@ -109,6 +120,7 @@ test('Should not be able to create passenger account if cpf is invalid', async f
     cpf: '877482488',
     isPassenger: true,
   };
+
   await expect(() => signup.execute(input)).rejects.toThrow(
     new Error('Invalid cpf'),
   );
@@ -128,7 +140,7 @@ test('Should be able to create a passenger account with stub', async function ()
   const getAccountByEmailStub = stub(
     AccountRepositoryDatabase.prototype,
     'getAccountByEmail',
-  ).resolves(undefined);
+  ).resolves();
   const getAccountByIdStub = stub(
     AccountRepositoryDatabase.prototype,
     'getAccountById',
@@ -144,13 +156,19 @@ test('Should be able to create a passenger account with stub', async function ()
     ),
   );
   const databaseConnection = new PgPromiseAdapter();
-  const accountRepository = new AccountRepositoryDatabase(databaseConnection);
+  const accountRepositoryDatabase = new AccountRepositoryDatabase(
+    databaseConnection,
+  );
   const mailerGateway = new MailerGatewayMemory();
-  const signup = new Signup(accountRepository, mailerGateway);
-  const getAccount = new GetAccount(accountRepository);
-  const outputSignup = await signup.execute(input);
+  const signupDatabase = new Signup(accountRepositoryDatabase, mailerGateway);
+  const getAccountDatabase = new GetAccount(accountRepositoryDatabase);
+  const outputSignup = await signupDatabase.execute(input);
+
   expect(outputSignup.accountId).toBeDefined();
-  const outputGetAccount = await getAccount.execute(outputSignup.accountId);
+  const outputGetAccount = await getAccountDatabase.execute(
+    outputSignup.accountId,
+  );
+
   expect(outputGetAccount.name).toEqual(input.name);
   expect(outputGetAccount.email).toEqual(input.email);
   expect(outputGetAccount.cpf).toEqual(input.cpf);
@@ -170,11 +188,15 @@ test('Should be able to create a passenger account with spy', async function () 
   const databaseConnection = new PgPromiseAdapter();
   const accountRepository = new AccountRepositoryDatabase(databaseConnection);
   const mailerGateway = new MailerGatewayMemory();
-  const signup = new Signup(accountRepository, mailerGateway);
-  const getAccount = new GetAccount(accountRepository);
-  const outputSignup = await signup.execute(input);
+  const signupDatabase = new Signup(accountRepository, mailerGateway);
+  const getAccountDatabase = new GetAccount(accountRepository);
+  const outputSignup = await signupDatabase.execute(input);
+
   expect(outputSignup.accountId).toBeDefined();
-  const outputGetAccount = await getAccount.execute(outputSignup.accountId);
+  const outputGetAccount = await getAccountDatabase.execute(
+    outputSignup.accountId,
+  );
+
   expect(outputGetAccount.name).toEqual(input.name);
   expect(outputGetAccount.email).toEqual(input.email);
   expect(outputGetAccount.cpf).toEqual(input.cpf);
@@ -191,6 +213,7 @@ test('Should be able to create a passenger account with mock', async function ()
     isPassenger: true,
   };
   const sendMock = mock(MailerGatewayMemory.prototype);
+
   sendMock
     .expects('send')
     .withArgs(input.email, 'Welcome', '')
@@ -201,11 +224,15 @@ test('Should be able to create a passenger account with mock', async function ()
   const databaseConnection = new PgPromiseAdapter();
   const accountRepository = new AccountRepositoryDatabase(databaseConnection);
   const mailerGateway = new MailerGatewayMemory();
-  const signup = new Signup(accountRepository, mailerGateway);
-  const getAccount = new GetAccount(accountRepository);
-  const outputSignup = await signup.execute(input);
+  const signupDatabase = new Signup(accountRepository, mailerGateway);
+  const getAccountDatabase = new GetAccount(accountRepository);
+  const outputSignup = await signupDatabase.execute(input);
+
   expect(outputSignup.accountId).toBeDefined();
-  const outputGetAccount = await getAccount.execute(outputSignup.accountId);
+  const outputGetAccount = await getAccountDatabase.execute(
+    outputSignup.accountId,
+  );
+
   expect(outputGetAccount.name).toEqual(input.name);
   expect(outputGetAccount.email).toEqual(input.email);
   expect(outputGetAccount.cpf).toEqual(input.cpf);
