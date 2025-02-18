@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
-    "target": "ES2023",
-    "module": "commonjs",
+		"experimentalDecorators": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "strict": true,
+    "module": "commonjs",
     "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2023",
     "types": ["vitest/globals"]
   }
 }

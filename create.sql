@@ -23,7 +23,9 @@ create table cccat16.ride (
 	from_long numeric,
 	to_lat numeric,
 	to_long numeric,
-	date timestamp
+	date timestamp,
+	last_lat numeric,
+	last_long numeric
 );
 
 create table cccat16.position (
