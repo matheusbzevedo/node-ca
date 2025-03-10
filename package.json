@@ -1,68 +1,72 @@
 {
-  "name": "ca",
-  "version": "0.1.0",
-  "main": "index.js",
-  "scripts": {
-    "payment": "ts-node payment/src/mainApi.ts",
-    "prepare": "node .husky/install.mjs",
-    "ride": "ts-node ride/src/mainApi.ts",
-    "test:watch": "vitest --coverage --watch",
-    "test": "vitest"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "devDependencies": {
-    "@commitlint/cli": "^19.6.0",
-    "@commitlint/config-conventional": "^19.6.0",
-    "@eslint/compat": "^1.2.3",
-    "@eslint/eslintrc": "3.2.0",
-    "@eslint/js": "9.16.0",
-    "@types/express": "5.0.0",
-    "@types/mocha": "^10.0.10",
-    "@types/node": "22.10.1",
-    "@types/sinon": "17.0.3",
-    "@typescript-eslint/eslint-plugin": "^8.16.0",
-    "@vitest/coverage-istanbul": "^2.1.8",
-    "@vitest/ui": "^2.1.8",
-    "eslint": "9.16.0",
-    "eslint-config-prettier": "9.1.0",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "eslint-plugin-simple-import-sort": "^12.1.1",
-    "eslint-plugin-sonarjs": "^2.0.4",
-    "eslint-plugin-unicorn": "^56.0.1",
-    "eslint-plugin-unused-imports": "4.1.4",
-    "eslint-plugin-vitest": "^0.5.4",
-    "globals": "15.12.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^15.2.10",
-    "prettier": "3.4.1",
-    "sinon": "19.0.2",
-    "ts-node": "10.9.2",
-    "tslint": "6.1.3",
-    "tslint-config-prettier": "1.18.0",
-    "typescript": "5.7.2",
-    "vite": "^6.0.2",
-    "vite-tsconfig-paths": "^5.1.3",
-    "vitest": "^2.1.6"
-  },
-  "dependencies": {
-    "@hapi/hapi": "21.3.12",
-    "axios": "1.7.8",
-    "express": "4.21.1",
-    "pg-promise": "11.10.2"
-  },
-  "lint-staged": {
-    "*.ts": [
-      "eslint --fix",
-      "vitest related",
-      "prettier --write"
-    ]
-  },
-  "volta": {
-    "node": "22.11.0",
-    "npm": "10.9.2"
-  }
+	"name": "ca",
+	"version": "0.1.0",
+	"main": "index.js",
+	"scripts": {
+		"account": "ts-node account/src/mainApi.ts",
+		"amqp": "ts-node ride/src/infra/queue/producer.ts",
+		"payment": "ts-node payment/src/mainApi.ts",
+		"prepare": "node .husky/install.mjs",
+		"ride": "ts-node ride/src/mainApi.ts",
+		"test:watch": "vitest --coverage --watch",
+		"test": "vitest"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"description": "",
+	"devDependencies": {
+		"@commitlint/cli": "^19.6.0",
+		"@commitlint/config-conventional": "^19.6.0",
+		"@eslint/compat": "^1.2.3",
+		"@eslint/eslintrc": "3.2.0",
+		"@eslint/js": "9.16.0",
+		"@types/amqplib": "^0.10.7",
+		"@types/express": "5.0.0",
+		"@types/mocha": "^10.0.10",
+		"@types/node": "22.10.1",
+		"@types/sinon": "17.0.3",
+		"@typescript-eslint/eslint-plugin": "^8.16.0",
+		"@vitest/coverage-istanbul": "^2.1.8",
+		"@vitest/ui": "^2.1.8",
+		"eslint": "9.16.0",
+		"eslint-config-prettier": "9.1.0",
+		"eslint-plugin-import": "^2.31.0",
+		"eslint-plugin-prettier": "^5.2.1",
+		"eslint-plugin-simple-import-sort": "^12.1.1",
+		"eslint-plugin-sonarjs": "^2.0.4",
+		"eslint-plugin-unicorn": "^56.0.1",
+		"eslint-plugin-unused-imports": "4.1.4",
+		"eslint-plugin-vitest": "^0.5.4",
+		"globals": "15.12.0",
+		"husky": "^9.1.7",
+		"lint-staged": "^15.2.10",
+		"prettier": "3.4.1",
+		"sinon": "19.0.2",
+		"ts-node": "10.9.2",
+		"tslint": "6.1.3",
+		"tslint-config-prettier": "1.18.0",
+		"typescript": "5.7.2",
+		"vite": "^6.0.2",
+		"vite-tsconfig-paths": "^5.1.3",
+		"vitest": "^2.1.6"
+	},
+	"dependencies": {
+		"@hapi/hapi": "21.3.12",
+		"amqplib": "^0.10.5",
+		"axios": "1.7.8",
+		"express": "4.21.1",
+		"pg-promise": "11.10.2"
+	},
+	"lint-staged": {
+		"*.ts": [
+			"pnpm dlx biome check --write ",
+			"vitest related",
+			"pnpm dlx @biomejs/biome format --write ./src"
+		]
+	},
+	"volta": {
+		"node": "22.11.0",
+		"npm": "10.9.2"
+	}
 }
